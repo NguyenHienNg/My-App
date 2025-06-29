@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'providers/note_provider.dart';
+import 'providers/theme_provider.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,72 +14,38 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    // Sử dụng MultiProvider để cung cấp nhiều trạng thái cho ứng dụng
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => NoteProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Notes', 
+            debugShowCheckedModeBanner: false,
+            // Cấu hình Theme Material 3
+            themeMode: themeProvider.themeMode,
+            theme: _buildTheme(Brightness.light),
+            darkTheme: _buildTheme(Brightness.dark),
+            home: const HomeScreen(),
+          );
+        },
       ),
-      home: const MyHomePage(title: 'Flutter Demo'),
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Bạn đã nhấn được:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            // THAY ĐỔI BẮT ĐẦU TỪ ĐÂY
-            // Thêm một khoảng trống giữa số đếm và nút mới
-            const SizedBox(height: 20),
-            // Sử dụng ElevatedButton thay vì FloatingActionButton
-            ElevatedButton(
-              // onPressed vẫn gọi hàm _incrementCounter
-              onPressed: _incrementCounter,
-              // style cho phép bạn tùy chỉnh giao diện của nút
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
-              ),
-              // child là nội dung bên trong nút, ở đây là một widget Text
-              child: const Text('Nhấn vào đây!'),
-            ),
-            // THAY ĐỔI KẾT THÚC TẠI ĐÂY
-          ],
-        ),
-      ),
+  // Hàm tạo Theme Data theo chuẩn Material 3
+  ThemeData _buildTheme(Brightness brightness) {
+    final baseTheme = ThemeData(
+      brightness: brightness,
+      colorSchemeSeed: Colors.indigo, // Thay đổi màu này để có chủ đề màu khác
+      useMaterial3: true,
+    );
+    
+    return baseTheme.copyWith(
+      textTheme: GoogleFonts.latoTextTheme(baseTheme.textTheme),
     );
   }
 }
